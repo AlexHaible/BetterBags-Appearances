@@ -15,38 +15,38 @@ local className, classFilename, classId = UnitClass("player")
 -- Functions --
 -- Function to check if the item is transmoggable
 local function IsItemTransmoggable(itemData)
-    if not itemData or not itemData.itemID then
+    if not itemData.itemInfo or not itemData.itemInfo.itemID then
         return false
     end
 
     -- Use the C_Transmog.CanTransmogItem API to check if the item can be transmogged.
-    local canBeTransmogged = C_Transmog.CanTransmogItem(itemData.itemID)
+    local canBeTransmogged = C_Transmog.CanTransmogItem(itemData.itemInfo.itemID)
 
     return canBeTransmogged
 end
 
 -- Function to check if the item is for the player's class
 local function IsItemForMyClass(itemData)
-    if not itemData or not itemData.itemLink then
+    if not itemData.itemInfo or not itemData.itemInfo.itemLink then
         return false
     end
 
     -- Get the sourceID from the item link
-    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemLink))
+    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemInfo.itemLink))
 
     -- Check if the player can collect this item's appearance
     local hasItemData, canCollect = C_TransmogCollection.PlayerCanCollectSource(sourceID)
-    return hasItemData and canCollect
+    return canCollect
 end
 
 -- Function to check if the item's appearance is unknown
 local function IsAppearanceUnknown(itemData)
-    if not itemData or not itemData.itemLink then
+    if not itemData.itemInfo or not itemData.itemInfo.itemLink then
         return false
     end
 
     -- Get the sourceID from the item link
-    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemLink))
+    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemInfo.itemLink))
 
     -- Check if the player has the transmog for this item
     local hasTransmog = C_TransmogCollection.PlayerHasTransmogItem(sourceID)
@@ -57,13 +57,14 @@ end
 
 -- Function to generate category name for items suitable for the player's class
 local function GetMyClassCategoryName()
+    print("Player's Class: " .. className)
     return L:G(className .. " Items")
 end
 
 -- Function to check if the item is equippable
 local function IsItemEquippable(itemData)
     -- Check if itemEquipLoc is present and non-empty
-    if itemData and itemData.itemEquipLoc and itemData.itemEquipLoc ~= "" then
+    if itemData.itemInfo and itemData.itemInfo.itemEquipLoc and itemData.itemInfo.itemEquipLoc ~= "" then
         return true
     end
     return false
@@ -74,7 +75,7 @@ end
 -- First Category: Suitable for my class and appearance unknown
 categories:RegisterCategoryFunction("ItemsForMyClass", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemLink .. " " .. data.itemEquipLoc)
+    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
 
     if IsItemEquippable(data) and IsItemTransmoggable(data) and IsItemForMyClass(data) and IsAppearanceUnknown(data) then
         return GetMyClassCategoryName()
@@ -85,7 +86,7 @@ end)
 -- Second Category: Not suitable for my class but appearance unknown
 categories:RegisterCategoryFunction("ItemsForOtherClasses", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemLink .. " " .. data.itemEquipLoc)
+    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
     if IsItemEquippable(data) and IsItemTransmoggable(data) and not IsItemForMyClass(data) and IsAppearanceUnknown(data) then
         return L:G("Items for Other Classes")
     end
@@ -95,7 +96,7 @@ end)
 -- Third Category: Appearance already known
 categories:RegisterCategoryFunction("SafeForSelling", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemLink .. " " .. data.itemEquipLoc)
+    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
     if IsItemEquippable(data) and IsItemTransmoggable(data) and not IsAppearanceUnknown(data) then
         return L:G("Safe for Selling")
     end
