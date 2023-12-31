@@ -1,3 +1,6 @@
 package-as: BetterBags-Appearances
 
 license-output: LICENSE.txt
+
+ignore:
+  - BetterBagsAppearances.png
