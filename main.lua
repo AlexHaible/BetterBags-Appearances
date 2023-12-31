@@ -41,15 +41,15 @@ end
 
 -- Function to check if the item's appearance is unknown
 local function IsAppearanceUnknown(itemData)
-    if not itemData or not itemData.itemLink then
+    if not itemData.itemInfo or not itemData.itemInfo.itemLink then
         return false
     end
 
     -- Get the sourceID from the item link
-    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemLink))
+    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemInfo.itemLink))
 
     -- Check if the player has the transmog for this item
-    local hasTransmog = C_TransmogCollection.PlayerHasTransmog(sourceID)  -- Corrected function name
+    local hasTransmog = C_TransmogCollection.PlayerHasTransmog(sourceID)
 
     -- Return true if the appearance is unknown, false otherwise
     return not hasTransmog
