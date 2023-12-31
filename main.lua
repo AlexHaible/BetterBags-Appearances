@@ -12,6 +12,11 @@ local L = addon:GetModule('Localization')
 local className, classFilename, classId = UnitClass("player")
 -- End of Variables --
 
+
+-- Debugging --
+categories:AddItemToCategory(54441, L:G("Debugging"))
+-- End of Debugging --
+
 -- Functions --
 -- Function to check if the item is transmoggable
 local function IsItemTransmoggable(data)
@@ -80,7 +85,7 @@ end
 -- First Category: Suitable for my class and appearance unknown
 categories:RegisterCategoryFunction("ItemsForMyClass", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
+    print("Item Data from IFMC: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
 
     if IsItemEquippable(data) and IsItemTransmoggable(data) and IsItemForMyClass(data) and IsAppearanceUnknown(data) then
         return GetMyClassCategoryName()
@@ -91,7 +96,7 @@ end)
 -- Second Category: Not suitable for my class but appearance unknown
 categories:RegisterCategoryFunction("ItemsForOtherClasses", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
+    print("Item Data from IFOC: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
     if IsItemEquippable(data) and IsItemTransmoggable(data) and not IsItemForMyClass(data) and IsAppearanceUnknown(data) then
         return L:G("Items for Other Classes")
     end
@@ -101,13 +106,10 @@ end)
 -- Third Category: Appearance already known
 categories:RegisterCategoryFunction("SafeForSelling", function (data)
     -- Output to console the item data
-    print("Item Data: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
+    print("Item Data from SFS: " .. data.itemInfo.itemLink .. " " .. data.itemInfo.itemEquipLoc)
     if IsItemEquippable(data) and IsItemTransmoggable(data) and not IsAppearanceUnknown(data) then
         return L:G("Safe for Selling")
     end
     return nil
 end)
 -- End of Category Functions --
-
--- Debugging --
-categories:AddItemToCategory(54441, L:G("Debugging"))
