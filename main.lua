@@ -14,25 +14,30 @@ local className, classFilename, classId = UnitClass("player")
 
 -- Functions --
 -- Function to check if the item is transmoggable
-local function IsItemTransmoggable(itemData)
-    if not itemData.itemInfo or not itemData.itemInfo.itemID then
+local function IsItemTransmoggable(data)
+    if not data.itemInfo or not data.itemInfo.itemID then
         return false
     end
 
     -- Use the C_Transmog.CanTransmogItem API to check if the item can be transmogged.
-    local canBeTransmogged = C_Transmog.CanTransmogItem(itemData.itemInfo.itemID)
+    local canBeTransmogged = C_Transmog.CanTransmogItem(data.itemInfo.itemID)
 
     return canBeTransmogged
 end
 
 -- Function to check if the item is for the player's class
-local function IsItemForMyClass(itemData)
-    if not itemData.itemInfo or not itemData.itemInfo.itemLink then
+local function IsItemForMyClass(data)
+    if not data.itemInfo or not data.itemInfo.itemLink then
         return false
     end
 
     -- Get the sourceID from the item link
-    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemInfo.itemLink))
+    local sourceID = select(2, C_TransmogCollection.GetItemInfo(data.itemInfo.itemLink))
+
+    -- Check if sourceID is valid
+    if not sourceID then
+        return false
+    end
 
     -- Check if the player can collect this item's appearance
     local hasItemData, canCollect = C_TransmogCollection.PlayerCanCollectSource(sourceID)
@@ -40,13 +45,13 @@ local function IsItemForMyClass(itemData)
 end
 
 -- Function to check if the item's appearance is unknown
-local function IsAppearanceUnknown(itemData)
-    if not itemData.itemInfo or not itemData.itemInfo.itemLink then
+local function IsAppearanceUnknown(data)
+    if not data.itemInfo or not data.itemInfo.itemLink then
         return false
     end
 
     -- Get the sourceID from the item link
-    local sourceID = select(2, C_TransmogCollection.GetItemInfo(itemData.itemInfo.itemLink))
+    local sourceID = select(2, C_TransmogCollection.GetItemInfo(data.itemInfo.itemLink))
 
     -- Check if the player has the transmog for this item
     local hasTransmog = C_TransmogCollection.PlayerHasTransmog(sourceID)
@@ -62,9 +67,9 @@ local function GetMyClassCategoryName()
 end
 
 -- Function to check if the item is equippable
-local function IsItemEquippable(itemData)
+local function IsItemEquippable(data)
     -- Check if itemEquipLoc is present and non-empty
-    if itemData.itemInfo and itemData.itemInfo.itemEquipLoc and itemData.itemInfo.itemEquipLoc ~= "" then
+    if data.itemInfo and data.itemInfo.itemEquipLoc and data.itemInfo.itemEquipLoc ~= "" then
         return true
     end
     return false
