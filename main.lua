@@ -351,8 +351,8 @@ categories:RegisterCategoryFunction("SetAppearanceItemCategories", function (dat
     end
 
     if isUsableByCurrentClass(data) then
-        return L:G(className .. " Usable")
+        return L:G("Unknown - " .. className)
     else
-        return L:G("Other Classes")
+        return L:G("Unknown - Other Classes")
     end
 end)
