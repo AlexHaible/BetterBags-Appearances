@@ -1,7 +1,7 @@
-## Interface: 100200
+## Interface: 100205
 ## Title: BetterBags - Appearances
 ## Author: Sauravisus
-## Version: 1.0.2
+## Version: 1.0.3
 ## Notes: Categories to help transmog farming.
 ## X-Curse-Project-ID: 956133
 ## Dependencies: BetterBags
