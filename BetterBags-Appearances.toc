@@ -1,9 +1,20 @@
 ## Interface: 100206
+
 ## Title: BetterBags - Appearances
 ## Author: Sauravisus
-## Version: 2.0.0
 ## Notes: Categories to help transmog farming.
+## Version: @project-version@
+## X-Date: @project-date-iso@
+## X-Category: Bags & Inventory
 ## X-Curse-Project-ID: 956133
 ## Dependencies: BetterBags
 
+#@alpha@
+## OptionalDeps: BugSack, BugGrabber
+#@end-alpha@
+
 main.lua
+
+#@debug@
+## Version: DEV
+#@end-debug@
