@@ -17,7 +17,8 @@ local nonEquippableTypes = {
     ["INVTYPE_TRINKET"] = true,
     ["INVTYPE_FINGER"] = true,
     ["INVTYPE_NECK"] = true,
-    ["INVTYPE_BAG"] = true
+    ["INVTYPE_BAG"] = true,
+    ["INVTYPE_PROFESSION_TOOL"] = true,
 }
 
 -- Create a hidden tooltip for scanning
@@ -111,8 +112,8 @@ end
 
 -- Register the category function
 categories:RegisterCategoryFunction("MogCategorization", function(data)
-    -- Exclude non-equipable and artifacts
-    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 then
+    -- Exclude non-equipable, legendaries, and artifacts
+    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 then
         return nil
     end
 
