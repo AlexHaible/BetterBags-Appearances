@@ -110,8 +110,8 @@ end
 
 -- Register the category function
 categories:RegisterCategoryFunction("MogCategorization", function(data)
-    -- Exclude non-equipable and specific items like the Underlight Angler artifact
-    if not isEquipabble(data.itemInfo) or data.itemInfo.itemID == 133755 then
+    -- Exclude non-equipable and artifacts
+    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 then
         return nil
     end
 
