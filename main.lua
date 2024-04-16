@@ -106,18 +106,12 @@ function clearExistingCategories()
         local name, _ = GetItemSubClassInfo(Enum.ItemClass.Weapon, i)
         categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - " .. name), "ff00ff00"))
         categories:WipeCategory(L:G("Mog - Tradable - " .. name))
-        -- @debug@
-        print('Removed category for ' .. name)
-        -- @end-debug@
     end
 
     for i = Enum.ItemArmorSubclassMeta.MinValue, Enum.ItemArmorSubclassMeta.MaxValue do
         local name, _ = GetItemSubClassInfo(Enum.ItemClass.Armor, i)
         categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - " .. name), "ff00ff00"))
         categories:WipeCategory(L:G("Mog - Tradable - " .. name))
-        -- @debug@
-        print('Removed category for ' .. name)
-        -- @end-debug@
     end
 end
 
@@ -212,12 +206,10 @@ function Appearances:addAppearancesConfig()
 end
 
 Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_ADDED', function()
-    print('New item added to transmog collection. Refreshing categories.')
     clearExistingCategories()
 end)
 
 Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_REMOVED', function()
-    print('Item removed from transmog collection. Refreshing categories.')
     clearExistingCategories()
 end)
 
