@@ -21,6 +21,9 @@ local Config = BetterBags:GetModule('Config')
 ---@class Items: AceModule
 local Items = BetterBags:GetModule('Items')
 
+---@class Events: AceModule
+local Events = BetterBags:GetModule('Events')
+
 local defaults = {
     profile = {
         enableSubdivide = false,
@@ -29,7 +32,7 @@ local defaults = {
 
 local db
 
-local ConfigOptions = {
+local configOptions = {
     msg = {
         type = "toggle",
         name = "Subdivide by category",
@@ -86,7 +89,6 @@ function Appearances:OnInitialize()
     db = self.db.profile
 
     self:addAppearancesConfig()
-
     clearExistingCategories()
 end
 
@@ -98,18 +100,24 @@ function clearExistingCategories()
     categories:WipeCategory(L:G("Mog - Learnable"))
     categories:WipeCategory(L:G("Mog - Tradable"))
     categories:WipeCategory(L:G("Mog - Sellable"))
-    categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - Cloth"), "ff00ff00"))
-    categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - Leather"), "ff00ff00"))
-    categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - Mail"), "ff00ff00"))
-    categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - Plate"), "ff00ff00"))
-    categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - Cosmetic"), "ff00ff00"))
-    categories:WipeCategory(L:G("Mog - Tradable - Cloth"))
-    categories:WipeCategory(L:G("Mog - Tradable - Leather"))
-    categories:WipeCategory(L:G("Mog - Tradable - Mail"))
-    categories:WipeCategory(L:G("Mog - Tradable - Plate"))
-    categories:WipeCategory(L:G("Mog - Tradable - Cosmetic"))
-    -- TODO: Get the language strings used for weapon subtypes
 
+    for i = Enum.ItemWeaponSubclassMeta.MinValue, Enum.ItemWeaponSubclassMeta.MaxValue do
+        local name, _ = GetItemSubClassInfo(Enum.ItemClass.Weapon, i)
+        categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - " .. name), "ff00ff00"))
+        categories:WipeCategory(L:G("Mog - Tradable - " .. name))
+        -- @debug@
+        print('Removed category for ' .. name)
+        -- @end-debug@
+    end
+
+    for i = Enum.ItemArmorSubclassMeta.MinValue, Enum.ItemArmorSubclassMeta.MaxValue do
+        local name, _ = GetItemSubClassInfo(Enum.ItemClass.Armor, i)
+        categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - " .. name), "ff00ff00"))
+        categories:WipeCategory(L:G("Mog - Tradable - " .. name))
+        -- @debug@
+        print('Removed category for ' .. name)
+        -- @end-debug@
+    end
 end
 
 -- Debug dump functions
@@ -193,15 +201,24 @@ function isItemIgnored(itemID)
     return false
 end
 
--- This function ensures that the config is added only when everything is properly set up
 function Appearances:addAppearancesConfig()
-    if not Config or not ConfigOptions then
+    if not Config or not configOptions then
         print("Failed to load configurations for Appearances plugin.")
         return
     end
 
-    Config:AddPluginConfig("Appearances", ConfigOptions)
+    Config:AddPluginConfig("Appearances", configOptions)
 end
+
+Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_ADDED', function()
+    print('New item added to transmog collection. Refreshing categories.')
+    clearExistingCategories()
+end)
+
+Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_REMOVED', function()
+    print('Item removed from transmog collection. Refreshing categories.')
+    clearExistingCategories()
+end)
 
 -- Register the category function
 categories:RegisterCategoryFunction("MogCategorization", function(data)
