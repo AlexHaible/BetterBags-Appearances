@@ -19,6 +19,7 @@ local nonEquippableTypes = {
     ["INVTYPE_NECK"] = true,
     ["INVTYPE_BAG"] = true,
     ["INVTYPE_PROFESSION_TOOL"] = true,
+    ["INVTYPE_PROFESSION_GEAR"] = true,
 }
 
 -- Create a hidden tooltip for scanning
