@@ -18,9 +18,6 @@ local Appearances = BetterBags:NewModule('Appearances')
 ---@class Config: AceModule
 local Config = BetterBags:GetModule('Config')
 
----@class Items: AceModule
-local Items = BetterBags:GetModule('Items')
-
 ---@class Events: AceModule
 local Events = BetterBags:GetModule('Events')
 
@@ -76,16 +73,7 @@ local itemIdsToIgnore = {
 -- Functions --
 -- On plugin load, wipe the categories we've added
 function Appearances:OnInitialize()
-    self.db = AceDB:New("BetterBags_AppearancesDB", {
-        profile = {
-            enableSubdivide = false,
-        },
-    })
-    self.db:RegisterDefaults({
-        profile = {
-            enableSubdivide = false,
-        },
-    })
+    self.db = AceDB:New("BetterBags_AppearancesDB", defaults)
     self.db:SetProfile("global")
     db = self.db.profile
 
