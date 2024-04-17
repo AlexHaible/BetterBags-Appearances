@@ -43,7 +43,7 @@ local configOptions = {
         set = function(info, value)
             Appearances.db.profile.enableSubdivide = value
             clearExistingCategories()
-            Items:FullRefreshAll()
+            Events:SendMessage('bags/FullRefreshAll')
             print("Subdivide by category is now set to: ", value)
         end,
     },
