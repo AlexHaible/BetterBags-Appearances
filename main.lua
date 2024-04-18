@@ -41,7 +41,6 @@ local configOptions = {
             Appearances.db.profile.enableSubdivide = value
             clearExistingCategories()
             Events:SendMessage('bags/FullRefreshAll')
-            print("Subdivide by category is now set to: ", value)
         end,
     },
 }

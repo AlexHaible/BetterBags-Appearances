@@ -8,6 +8,7 @@
 ## X-Category: Bags & Inventory
 ## X-Curse-Project-ID: 956133
 ## Dependencies: BetterBags
+## SavedVariables: BetterBags_AppearancesDB
 
 #@alpha@
 ## OptionalDeps: BugSack, BugGrabber
