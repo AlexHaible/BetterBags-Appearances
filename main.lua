@@ -78,6 +78,7 @@ function Appearances:OnInitialize()
 
     self:addAppearancesConfig()
     clearExistingCategories()
+    killOldCategories()
 end
 
 -- Kill the subcategories if they exist --
@@ -99,6 +100,20 @@ function clearExistingCategories()
         local name, _ = GetItemSubClassInfo(Enum.ItemClass.Armor, i)
         categories:WipeCategory(WrapTextInColorCode(L:G("Mog - Tradable - " .. name), "ff00ff00"))
         categories:WipeCategory(L:G("Mog - Tradable - " .. name))
+    end
+end
+
+function killOldCategories()
+    categories:WipeCategory(L:G("Other Classes"))
+    categories:WipeCategory(L:G("Unknown - Other Classes"))
+    categories:WipeCategory(L:G("Known - BoE"))
+    categories:WipeCategory(L:G("Known - BoP"))
+    
+    -- Loop through all classes and wipe the categories
+    for i = 1, GetNumClasses() do
+        local className, _ = GetClassInfo(i)
+        categories:WipeCategory(L:G(className .. " Usable"))
+        categories:WipeCategory(L:G("Unknown - " .. className))
     end
 end
 
