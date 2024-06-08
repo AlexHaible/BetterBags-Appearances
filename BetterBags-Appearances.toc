@@ -1,4 +1,4 @@
-## Interface: 100207
+## Interface: 100207, 110000
 
 ## Title: BetterBags - Appearances
 ## Author: Sauravisus
@@ -9,6 +9,7 @@
 ## X-Curse-Project-ID: 956133
 ## Dependencies: BetterBags
 ## SavedVariables: BetterBags_AppearancesDB
+## IconTexture: Interface\Icons\inv_misc_bag_24_netherweave_imbued
 
 #@alpha@
 ## OptionalDeps: BugSack, BugGrabber
