@@ -60,6 +60,7 @@ local scanTooltip = CreateFrame("GameTooltip", "BindCheckTooltipScanner", nil, "
 scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 local itemIdsToIgnore = {
+    13289, -- Egan's Blaster
     49888, -- Shadow's Edge
     71084, -- Branch of Nordrassil
     71085, -- Runestaff of Nordrassil
