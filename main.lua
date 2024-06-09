@@ -32,8 +32,8 @@ local db
 local configOptions = {
     msg = {
         type = "toggle",
-        name = "Subdivide by category",
-        desc = "This will also split items into categories based on their type.",
+        name = "Split by Item Type",
+        desc = "This will split tradable items into categories based on their type.",
         get = function(info)
             return Appearances.db.profile.enableSubdivide
         end,
