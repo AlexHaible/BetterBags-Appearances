@@ -9,7 +9,7 @@ local categories = BetterBags:GetModule('Categories')
 ---@class Localization: AceModule
 local L = BetterBags:GetModule('Localization')
 
----@class AceDB: AceModule
+---@class AceDB-3.0: AceModule
 local AceDB = LibStub("AceDB-3.0")
 
 ---@class Appearances: AceModule
