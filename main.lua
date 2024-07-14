@@ -62,7 +62,16 @@ local configOptions = {
                     clearExistingCategories()
                     Events:SendMessage('bags/FullRefreshAll')
                 end,
-            }
+            },
+            forceRefreshItems = {
+                type = "execute",
+                name = "Force Refresh",
+                desc = "This will forcibly refresh the Item categories.",
+                func = function()
+                    clearExistingCategories()
+                    Events:SendMessage('bags/FullRefreshAll')
+                end,
+            },
         },
     },
 }
