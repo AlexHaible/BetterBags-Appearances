@@ -110,7 +110,7 @@ function Appearances:OnInitialize()
 
     self:addAppearancesConfig()
     clearExistingCategories()
-    killOldCategories()
+    KillOldCategories()
 end
 
 -- Kill the subcategories if they exist --
@@ -142,7 +142,7 @@ function clearExistingCategories()
     -- Subcategories by weapon and armor
     local function wipeSubCategories(itemClass, minValue, maxValue, prefix)
         for i = minValue, maxValue do
-            local name, _ = GetItemSubClassInfo(itemClass, i)
+            local name, _ = C_Item.GetItemSubClassInfo(itemClass, i)
             if name then
                 wipeCategories({prefix .. " - " .. name})
             end
@@ -162,7 +162,7 @@ function clearExistingCategories()
     -- Categories by weapon and armor subtypes and equip locations
     local function wipeCombinedSubCategories(itemClass, minValue, maxValue)
         for i = minValue, maxValue do
-            local subType, _ = GetItemSubClassInfo(itemClass, i)
+            local subType, _ = C_Item.GetItemSubClassInfo(itemClass, i)
             if subType then
                 for _, equipLoc in ipairs(equipLocs) do
                     local combinedCategory = "Mog - Tradable - " .. subType .. " - " .. _G[equipLoc]
@@ -176,7 +176,7 @@ function clearExistingCategories()
     wipeCombinedSubCategories(Enum.ItemClass.Armor, Enum.ItemArmorSubclassMeta.MinValue, Enum.ItemArmorSubclassMeta.MaxValue)
 end
 
-function killOldCategories()
+function KillOldCategories()
     categories:WipeCategory(L:G("Other Classes"))
     categories:WipeCategory(L:G("Unknown - Other Classes"))
     categories:WipeCategory(L:G("Known - BoE"))
@@ -210,14 +210,14 @@ end
 
 -- Debug dump functions
 -- @debug@
-function dump(o)
+function Dump(o)
     if type(o) == 'table' then
         local s = '{ '
         for k, v in pairs(o) do
             if type(k) ~= 'number' then
                 k = '"' .. k .. '"'
             end
-            s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
+            s = s .. '[' .. k .. '] = ' .. Dump(v) .. ','
         end
         return s .. '} '
     else
@@ -266,7 +266,7 @@ function canLearnAppearance(data)
     return true
 end
 
-function checkItemBindStatus(itemLink)
+function CheckItemBindStatus(itemLink)
     scanTooltip:ClearLines()
     scanTooltip:SetHyperlink(itemLink)
 
@@ -282,7 +282,7 @@ function checkItemBindStatus(itemLink)
     return "None"
 end
 
-function isItemIgnored(itemID)
+function IsItemIgnored(itemID)
     for index, id in ipairs(itemIdsToIgnore) do
         if itemID == id then return true end
     end
@@ -309,11 +309,11 @@ end)
 -- Register the category function
 categories:RegisterCategoryFunction("MogCategorization", function(data)
     -- Exclude non-equipable, legendaries, and artifacts
-    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or isItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
+    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or IsItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
         return nil
     end
 
-    local bindType = checkItemBindStatus(data.itemInfo.itemLink)
+    local bindType = CheckItemBindStatus(data.itemInfo.itemLink)
     local canLearn = canLearnAppearance(data)
 
     -- If the item cannot be learned
