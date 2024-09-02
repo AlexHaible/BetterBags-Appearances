@@ -137,7 +137,7 @@ function Appearances:ClearExistingCategories()
     -- Function to wipe categories
     local function wipeCategories(categoryList)
         for _, category in ipairs(categoryList) do
-            Categories:WipeCategory(WrapCategoryText(category))
+            Categories:WipeCategory(Appearances:WrapCategoryText(category))
             Categories:WipeCategory(L:G(category))
         end
     end
