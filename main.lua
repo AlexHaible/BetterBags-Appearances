@@ -315,7 +315,7 @@ end)
 -- Register the category function
 Categories:RegisterCategoryFunction("MogCategorization", function(data)
     -- Exclude non-equipable, legendaries, and artifacts
-    if not Appearances:IsEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or IsItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
+    if not Appearances:IsEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or Appearances:IsItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
         return nil
     end
 
