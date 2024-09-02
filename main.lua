@@ -4,7 +4,7 @@ local BetterBags = LibStub('AceAddon-3.0'):GetAddon("BetterBags")
 assert(BetterBags, "BetterBags - Appearances requires BetterBags")
 
 ---@class Categories: AceModule
-local categories = BetterBags:GetModule('Categories')
+local Categories = BetterBags:GetModule('Categories')
 
 ---@class Localization: AceModule
 local L = BetterBags:GetModule('Localization')
@@ -20,6 +20,9 @@ local Config = BetterBags:GetModule('Config')
 
 ---@class Events: AceModule
 local Events = BetterBags:GetModule('Events')
+
+---@class Context: AceModule
+local Context = BetterBags:GetModule('Context')
 
 local defaults = {
     profile = {
@@ -46,8 +49,9 @@ local configOptions = {
                 end,
                 set = function(info, value)
                     Appearances.db.profile.enableSubdivide = value
-                    clearExistingCategories()
-                    Events:SendMessage('bags/FullRefreshAll')
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
                 end,
             },
             splitByLoc = {
@@ -59,8 +63,9 @@ local configOptions = {
                 end,
                 set = function(info, value)
                     Appearances.db.profile.enableItemLocSplit = value
-                    clearExistingCategories()
-                    Events:SendMessage('bags/FullRefreshAll')
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
                 end,
             },
             forceRefreshItems = {
@@ -68,8 +73,9 @@ local configOptions = {
                 name = "Force Refresh",
                 desc = "This will forcibly refresh the Item categories.",
                 func = function()
-                    clearExistingCategories()
-                    Events:SendMessage('bags/FullRefreshAll')
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
                 end,
             },
         },
@@ -108,13 +114,13 @@ function Appearances:OnInitialize()
     self.db:SetProfile("global")
     db = self.db.profile
 
-    self:addAppearancesConfig()
-    clearExistingCategories()
-    KillOldCategories()
+    self:AddAppearancesConfig()
+    self:ClearExistingCategories()
+    self:KillOldCategories()
 end
 
 -- Kill the subcategories if they exist --
-function clearExistingCategories()
+function Appearances:ClearExistingCategories()
     local baseCategories = {
         "Mog - Learnable",
         "Mog - Tradable",
@@ -131,8 +137,8 @@ function clearExistingCategories()
     -- Function to wipe categories
     local function wipeCategories(categoryList)
         for _, category in ipairs(categoryList) do
-            categories:WipeCategory(WrapCategoryText(category))
-            categories:WipeCategory(L:G(category))
+            Categories:WipeCategory(WrapCategoryText(category))
+            Categories:WipeCategory(L:G(category))
         end
     end
 
@@ -176,41 +182,41 @@ function clearExistingCategories()
     wipeCombinedSubCategories(Enum.ItemClass.Armor, Enum.ItemArmorSubclassMeta.MinValue, Enum.ItemArmorSubclassMeta.MaxValue)
 end
 
-function KillOldCategories()
-    categories:WipeCategory(L:G("Other Classes"))
-    categories:WipeCategory(L:G("Unknown - Other Classes"))
-    categories:WipeCategory(L:G("Known - BoE"))
-    categories:WipeCategory(L:G("Known - BoP"))
+function Appearances:KillOldCategories()
+    Categories:WipeCategory(L:G("Other Classes"))
+    Categories:WipeCategory(L:G("Unknown - Other Classes"))
+    Categories:WipeCategory(L:G("Known - BoE"))
+    Categories:WipeCategory(L:G("Known - BoP"))
     
     -- Loop through all classes and wipe the categories
     for i = 1, GetNumClasses() do
         local className, _ = GetClassInfo(i)
-        categories:WipeCategory(L:G(className .. " Usable"))
-        categories:WipeCategory(L:G("Unknown - " .. className))
+        Categories:WipeCategory(L:G(className .. " Usable"))
+        Categories:WipeCategory(L:G("Unknown - " .. className))
     end
 end
 
 -- Function to wrap text in color code
-function WrapCategoryText(category)
+function Appearances:WrapCategoryText(category)
     return WrapTextInColorCode(L:G(category), "ff00ff00")
 end
 
 -- Function to build category string
-function BuildCategory(base, subType, equipLoc)
+function Appearances:BuildCategory(base, subType, equipLoc)
     if db.enableSubdivide and db.enableItemLocSplit then
-        return WrapCategoryText(base .. " - " .. subType .. " - " .. _G[equipLoc])
+        return self:WrapCategoryText(base .. " - " .. subType .. " - " .. _G[equipLoc])
     elseif db.enableSubdivide then
-        return WrapCategoryText(base .. " - " .. subType)
+        return self:WrapCategoryText(base .. " - " .. subType)
     elseif db.enableItemLocSplit then
-        return WrapCategoryText(base .. " - " .. _G[equipLoc])
+        return self:WrapCategoryText(base .. " - " .. _G[equipLoc])
     else
-        return WrapCategoryText(base)
+        return self:WrapCategoryText(base)
     end
 end
 
 -- Debug dump functions
 -- @debug@
-function Dump(o)
+function Appearances:Dump(o)
     if type(o) == 'table' then
         local s = '{ '
         for k, v in pairs(o) do
@@ -225,13 +231,13 @@ function Dump(o)
     end
 end
 
-function printTable(tbl, indent)
+function Appearances:PrintTable(tbl, indent)
     if not indent then indent = 0 end
     for k, v in pairs(tbl) do
         formatting = string.rep("  ", indent) .. k .. ": "
         if type(v) == "table" then
             print(formatting)
-            printTable(v, indent+1)
+            self:PrintTable(v, indent+1)
         elseif type(v) == 'boolean' then
             print(formatting .. tostring(v))      
         else
@@ -241,11 +247,11 @@ function printTable(tbl, indent)
 end
 -- @end-debug@
 
-function isEquipabble(itemInfo)
+function Appearances:IsEquipabble(itemInfo)
     return not nonEquippableTypes[itemInfo.itemEquipLoc]
 end
 
-function canLearnAppearance(data)
+function Appearances:CanLearnAppearance(data)
     local itemLink = C_Container.GetContainerItemLink(data.bagid, data.slotid)
     local _, _, transmogSource = C_Transmog.CanTransmogItem(itemLink)
     if not transmogSource then return nil end
@@ -266,7 +272,7 @@ function canLearnAppearance(data)
     return true
 end
 
-function CheckItemBindStatus(itemLink)
+function Appearances:CheckItemBindStatus(itemLink)
     scanTooltip:ClearLines()
     scanTooltip:SetHyperlink(itemLink)
 
@@ -282,16 +288,16 @@ function CheckItemBindStatus(itemLink)
     return "None"
 end
 
-function IsItemIgnored(itemID)
+function Appearances:IsItemIgnored(itemID)
     for index, id in ipairs(itemIdsToIgnore) do
         if itemID == id then return true end
     end
     return false
 end
 
-function Appearances:addAppearancesConfig()
+function Appearances:AddAppearancesConfig()
     if not Config or not configOptions then
-        print("Failed to load configurations for Appearances plugin.")
+        print("Failed to load configurations for BetterBags - Appearances plugin.")
         return
     end
 
@@ -299,38 +305,38 @@ function Appearances:addAppearancesConfig()
 end
 
 Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_ADDED', function()
-    clearExistingCategories()
+    Appearances:ClearExistingCategories()
 end)
 
 Events:RegisterEvent('TRANSMOG_COLLECTION_SOURCE_REMOVED', function()
-    clearExistingCategories()
+    Appearances:ClearExistingCategories()
 end)
 
 -- Register the category function
-categories:RegisterCategoryFunction("MogCategorization", function(data)
+Categories:RegisterCategoryFunction("MogCategorization", function(data)
     -- Exclude non-equipable, legendaries, and artifacts
-    if not isEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or IsItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
+    if not Appearances:IsEquipabble(data.itemInfo) or data.itemInfo.itemQuality == 6 or data.itemInfo.itemQuality == 5 or IsItemIgnored(data.itemInfo.itemID) or C_Heirloom.IsItemHeirloom(data.itemInfo.itemID) then
         return nil
     end
 
-    local bindType = CheckItemBindStatus(data.itemInfo.itemLink)
-    local canLearn = canLearnAppearance(data)
+    local bindType = Appearances:CheckItemBindStatus(data.itemInfo.itemLink)
+    local canLearn = Appearances:CanLearnAppearance(data)
 
     -- If the item cannot be learned
     if not canLearn then
         -- Handle BoA items separately, as they are bound but tradable across the account
         if bindType == "BoA" then
-            return BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
         -- Check if the item is bound and not BoA, categorize as "Mog - Sellable"
         elseif data.itemInfo.isBound or bindType == "BoP" then
-            return WrapCategoryText("Mog - Sellable")
+            return Appearances:WrapCategoryText("Mog - Sellable")
         elseif bindType == "BoE" then
             -- If the item is BoE and not bound, it's tradable
-            return BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
         end
     elseif canLearn then
         -- If the item's appearance can be learned
-        return WrapCategoryText("Mog - Learnable")
+        return Appearances:WrapCategoryText("Mog - Learnable")
     end
     -- Default case if none of the conditions are met, might need explicit handling
 end)
