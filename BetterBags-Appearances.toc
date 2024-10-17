@@ -1,7 +1,7 @@
-## Interface: 100207, 110000, 110002
+## Interface: 100207, 110000, 110002, 110005
 
 ## Title: BetterBags - Appearances
-## Author: Sauravisus
+## Author: Sauravisus (Xirastrasza - Argent Dawn EU, Horde)
 ## Notes: Categories to help transmog farming.
 ## Version: @project-version@
 ## X-Date: @project-date-iso@
