@@ -1,4 +1,4 @@
-## Interface: 120000
+## Interface: 110205, 110207, 120000
 
 ## Title: BetterBags - Appearances
 ## Author: Sauravisus (Xirastrasza - Argent Dawn EU, Horde)
