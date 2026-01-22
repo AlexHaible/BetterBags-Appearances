@@ -253,8 +253,6 @@ end
 
 function Appearances:CanLearnAppearance(data)
     local itemLink = C_Container.GetContainerItemLink(data.bagid, data.slotid)
-    local _, _, transmogSource = C_Transmog.CanTransmogItem(itemLink)
-    if not transmogSource then return nil end
 
     local itemAppearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLink)
     if not sourceID then return nil end
