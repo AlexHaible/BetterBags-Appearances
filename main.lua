@@ -156,14 +156,27 @@ local scanTooltip = CreateFrame("GameTooltip", "BindCheckTooltipScanner", nil, "
 scanTooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
 local itemIdsToIgnore = {
-    13289, -- Egan's Blaster
-    49888, -- Shadow's Edge
-    71084, -- Branch of Nordrassil
-    71085, -- Runestaff of Nordrassil
-    77945, -- Fear
-    77946, -- Vengeance
-    77947, -- The Sleeper
-    77948, -- The Dreamer
+    [13289] = true, -- Egan's Blaster
+    [49888] = true, -- Shadow's Edge
+    [71084] = true, -- Branch of Nordrassil
+    [71085] = true, -- Runestaff of Nordrassil
+    [77945] = true, -- Fear
+    [77946] = true, -- Vengeance
+    [77947] = true, -- The Sleeper
+    [77948] = true, -- The Dreamer
+}
+
+local baseCategories = {
+    "Mog - Learnable",
+    "Mog - Tradable",
+    "Mog - Sellable"
+}
+
+local equipLocs = {
+    "INVTYPE_HEAD", "INVTYPE_NECK", "INVTYPE_SHOULDER", "INVTYPE_BODY", "INVTYPE_CHEST", "INVTYPE_WAIST", "INVTYPE_LEGS", "INVTYPE_FEET",
+    "INVTYPE_WRIST", "INVTYPE_HAND", "INVTYPE_FINGER", "INVTYPE_TRINKET", "INVTYPE_CLOAK", "INVTYPE_WEAPON", "INVTYPE_SHIELD", "INVTYPE_RANGED",
+    "INVTYPE_2HWEAPON", "INVTYPE_TABARD", "INVTYPE_ROBE", "INVTYPE_WEAPONMAINHAND", "INVTYPE_WEAPONOFFHAND", "INVTYPE_HOLDABLE", "INVTYPE_AMMO",
+    "INVTYPE_THROWN", "INVTYPE_RANGEDRIGHT", "INVTYPE_RELIC"
 }
 
 -- Functions --
@@ -172,6 +185,13 @@ function Appearances:OnInitialize()
     self.db = AceDB:New("BetterBags_AppearancesDB", defaults)
     self.db:SetProfile("global")
     db = self.db.profile
+    
+    self.categoryCache = {}
+    self.slotCache = {}
+    -- Pre-cache localized slot names to avoid _G lookups later
+    for _, equipLoc in ipairs(equipLocs) do
+        self.slotCache[equipLoc] = _G[equipLoc]
+    end
 
     self:AddAppearancesConfig()
     self:ClearExistingCategories()
@@ -180,19 +200,7 @@ end
 
 -- Kill the subcategories if they exist --
 function Appearances:ClearExistingCategories()
-    local baseCategories = {
-        "Mog - Learnable",
-        "Mog - Tradable",
-        "Mog - Sellable"
-    }
-
-    local equipLocs = {
-        "INVTYPE_HEAD", "INVTYPE_NECK", "INVTYPE_SHOULDER", "INVTYPE_BODY", "INVTYPE_CHEST", "INVTYPE_WAIST", "INVTYPE_LEGS", "INVTYPE_FEET",
-        "INVTYPE_WRIST", "INVTYPE_HAND", "INVTYPE_FINGER", "INVTYPE_TRINKET", "INVTYPE_CLOAK", "INVTYPE_WEAPON", "INVTYPE_SHIELD", "INVTYPE_RANGED",
-        "INVTYPE_2HWEAPON", "INVTYPE_TABARD", "INVTYPE_ROBE", "INVTYPE_WEAPONMAINHAND", "INVTYPE_WEAPONOFFHAND", "INVTYPE_HOLDABLE", "INVTYPE_AMMO",
-        "INVTYPE_THROWN", "INVTYPE_RANGEDRIGHT", "INVTYPE_RELIC"
-    }
-
+    self.categoryCache = {}
     -- Function to wipe categories
     local function wipeCategories(categoryList)
         for _, category in ipairs(categoryList) do
@@ -220,7 +228,7 @@ function Appearances:ClearExistingCategories()
     -- Categories by equip location
     local equipLocCategories = {}
     for _, equipLoc in ipairs(equipLocs) do
-        table.insert(equipLocCategories, "Mog - Tradable - " .. _G[equipLoc])
+        table.insert(equipLocCategories, "Mog - Tradable - " .. self.slotCache[equipLoc])
     end
     wipeCategories(equipLocCategories)
 
@@ -230,7 +238,7 @@ function Appearances:ClearExistingCategories()
             local subType, _ = C_Item.GetItemSubClassInfo(itemClass, i)
             if subType then
                 for _, equipLoc in ipairs(equipLocs) do
-                    local combinedCategory = "Mog - Tradable - " .. subType .. " - " .. _G[equipLoc]
+                    local combinedCategory = "Mog - Tradable - " .. subType .. " - " .. self.slotCache[equipLoc]
                     wipeCategories({combinedCategory})
                 end
             end
@@ -257,17 +265,20 @@ end
 
 -- Function to wrap text in color code
 function Appearances:WrapCategoryText(category)
-    return WrapTextInColorCode(L:G(category), "ff00ff00")
+    if not self.categoryCache[category] then
+        self.categoryCache[category] = WrapTextInColorCode(L:G(category), "ff00ff00")
+    end
+    return self.categoryCache[category]
 end
 
 -- Function to build category string
 function Appearances:BuildCategory(base, subType, equipLoc)
     if db.enableSubdivide and db.enableItemLocSplit then
-        return self:WrapCategoryText(base .. " - " .. subType .. " - " .. _G[equipLoc])
+        return self:WrapCategoryText(base .. " - " .. subType .. " - " .. self.slotCache[equipLoc])
     elseif db.enableSubdivide then
         return self:WrapCategoryText(base .. " - " .. subType)
     elseif db.enableItemLocSplit then
-        return self:WrapCategoryText(base .. " - " .. _G[equipLoc])
+        return self:WrapCategoryText(base .. " - " .. self.slotCache[equipLoc])
     else
         return self:WrapCategoryText(base)
     end
@@ -311,7 +322,7 @@ function Appearances:IsEquipabble(itemInfo)
 end
 
 function Appearances:CanLearnAppearance(data)
-    local itemLink = C_Container.GetContainerItemLink(data.bagid, data.slotid)
+    local itemLink = data.itemInfo.itemLink
 
     local itemAppearanceID, sourceID = C_TransmogCollection.GetItemInfo(itemLink)
     if not sourceID then return nil end
@@ -319,17 +330,20 @@ function Appearances:CanLearnAppearance(data)
     local _, canCollect = C_TransmogCollection.PlayerCanCollectSource(sourceID)
     if not canCollect then return false end
 
-    local sources = C_TransmogCollection.GetAllAppearanceSources(itemAppearanceID)
-    for _, sourceID in ipairs(sources) do
-        if select(5, C_TransmogCollection.GetAppearanceSourceInfo(sourceID)) then
-            return false
-        end
-    end
+    if C_TransmogCollection.PlayerHasTransmog(itemAppearanceID) then return false end
 
     return true
 end
 
 function Appearances:CheckItemBindStatus(itemLink)
+    -- Optimization: Check standard bind types via API first
+    local bindType = select(14, C_Item.GetItemInfo(itemLink))
+    if bindType == 1 then return "BoP"
+    elseif bindType == 2 then return "BoE"
+    elseif bindType == 8 then return "BoA"
+    end
+
+    -- Fallback to tooltip scan if API result is inconclusive (e.g. some account bound items)
     scanTooltip:ClearLines()
     scanTooltip:SetHyperlink(itemLink)
 
@@ -346,10 +360,7 @@ function Appearances:CheckItemBindStatus(itemLink)
 end
 
 function Appearances:IsItemIgnored(itemID)
-    for index, id in ipairs(itemIdsToIgnore) do
-        if itemID == id then return true end
-    end
-    return false
+    return itemIdsToIgnore[itemID]
 end
 
 function Appearances:AddAppearancesConfig()
