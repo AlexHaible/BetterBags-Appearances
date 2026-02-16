@@ -26,6 +26,9 @@ local Context = BetterBags:GetModule('Context')
 
 local defaults = {
     profile = {
+        createLearnable = true,
+        createTradeable = true,
+        createSellable = true,
         enableSubdivide = false,
         enableItemLocSplit = false,
     },
@@ -34,14 +37,68 @@ local defaults = {
 local db
 
 local configOptions = {
+    createCategories = {
+        name = L:G("Create Categories"),
+        type = "group",
+        order = 1,
+        inline = false,
+        args = {
+            createLearnable = {
+                type = "toggle",
+                order = 2,
+                name = "Create Learnable",
+                desc = "This will create the category 'Mog - Learnable'.",
+                get = function(info)
+                    return Appearances.db.profile.createLearnable
+                end,
+                set = function(info, value)
+                    Appearances.db.profile.createLearnable = value
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
+                end,
+            },
+            createTradeable = {
+                type = "toggle",
+                order = 3,
+                name = "Create Tradeable",
+                desc = "This will create the category 'Mog - Tradeable'.",
+                get = function(info)
+                    return Appearances.db.profile.createTradeable
+                end,
+                set = function(info, value)
+                    Appearances.db.profile.createTradeable = value
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
+                end,
+            },
+            createSellable = {
+                type = "toggle",
+                order = 4,
+                name = "Create Sellable",
+                desc = "This will create the category 'Mog - Sellable'.",
+                get = function(info)
+                    return Appearances.db.profile.createSellable
+                end,
+                set = function(info, value)
+                    Appearances.db.profile.createSellable = value
+                    Appearances:ClearExistingCategories()
+                    local ctx = Context:New('BBAppearances_RefreshAll')
+                    Events:SendMessage(ctx, 'bags/FullRefreshAll')
+                end,
+            },
+        },
+    },
     splitGroup = {
         name = L:G("Item Splitting Options"),
         type = "group",
-        order = 1,
+        order = 5,
         inline = true,
         args = {
             splitByType = {
                 type = "toggle",
+                order = 6,
                 name = "Split by Item Type",
                 desc = "This will split tradable items into categories based on their type.",
                 get = function(info)
@@ -56,6 +113,7 @@ local configOptions = {
             },
             splitByLoc = {
                 type = "toggle",
+                order = 7,
                 name = "Split by Item Location",
                 desc = "This will split tradable items into categories based on their equip slot.",
                 get = function(info)
@@ -70,6 +128,7 @@ local configOptions = {
             },
             forceRefreshItems = {
                 type = "execute",
+                order = 8,
                 name = "Force Refresh",
                 desc = "This will forcibly refresh the Item categories.",
                 func = function()
@@ -324,17 +383,26 @@ Categories:RegisterCategoryFunction("MogCategorization", function(data)
     if not canLearn then
         -- Handle BoA items separately, as they are bound but tradable across the account
         if bindType == "BoA" then
-            return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            if db.createTradeable then
+                return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            end
         -- Check if the item is bound and not BoA, categorize as "Mog - Sellable"
         elseif data.itemInfo.isBound or bindType == "BoP" then
-            return Appearances:WrapCategoryText("Mog - Sellable")
+            if db.createSellable then
+                return Appearances:WrapCategoryText("Mog - Sellable")
+            end
         elseif bindType == "BoE" then
             -- If the item is BoE and not bound, it's tradable
-            return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            if db.createTradeable then
+                return Appearances:BuildCategory("Mog - Tradable", data.itemInfo.itemSubType, data.itemInfo.itemEquipLoc)
+            end
         end
     elseif canLearn then
         -- If the item's appearance can be learned
-        return Appearances:WrapCategoryText("Mog - Learnable")
+        if db.createLearnable then
+            return Appearances:WrapCategoryText("Mog - Learnable")
+        end
     end
-    -- Default case if none of the conditions are met, might need explicit handling
+    
+    return nil
 end)
